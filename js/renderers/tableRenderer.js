@@ -1,6 +1,9 @@
-let expandedMP=null;
+let expandedMP = null;
+let visibleRows = 50;
 
 export function renderMatrix(container,data,mpGroups,listingSet){
+
+const slice = data.slice(0,visibleRows);
 
 let html="<table><thead><tr>";
 
@@ -16,7 +19,7 @@ ${mp} (${mpGroups[mp].length})
 
 html+="</tr></thead><tbody>";
 
-data.forEach(r=>{
+slice.forEach(r=>{
 
 html+="<tr>";
 
@@ -34,7 +37,6 @@ html+=`<td class="${cls}">${r[mp]}</td>`;
 });
 
 html+="</tr>";
-
 
 if(expandedMP){
 
@@ -56,7 +58,9 @@ Object.keys(mpGroups).forEach(mp=>{
 
 if(mp===expandedMP){
 
-html+=`<td class="${cls}">${live?"LIVE":"NONLIVE"}</td>`;
+html+=`<td class="${cls}">
+${live?"LIVE":"NONLIVE"}
+</td>`;
 
 }else{
 
@@ -76,8 +80,23 @@ html+="</tr>";
 
 html+="</tbody></table>";
 
+if(data.length>visibleRows){
+
+html+=`
+<div style="padding:20px;text-align:center">
+<button id="loadMore">Load More</button>
+</div>
+`;
+
+}
+
 container.innerHTML=html;
 
+attachEvents(container,data,mpGroups,listingSet);
+
+}
+
+function attachEvents(container,data,mpGroups,listingSet){
 
 document.querySelectorAll(".mpHeader").forEach(h=>{
 
@@ -85,7 +104,7 @@ h.onclick=()=>{
 
 const mp=h.dataset.mp;
 
-expandedMP= expandedMP===mp ? null : mp;
+expandedMP = expandedMP===mp ? null : mp;
 
 renderMatrix(container,data,mpGroups,listingSet);
 
@@ -93,9 +112,21 @@ renderMatrix(container,data,mpGroups,listingSet);
 
 });
 
+const btn=document.getElementById("loadMore");
+
+if(btn){
+
+btn.onclick=()=>{
+
+visibleRows+=50;
+
+renderMatrix(container,data,mpGroups,listingSet);
+
+};
+
 }
 
-
+}
 
 export function renderCount(container,data){
 
@@ -105,7 +136,7 @@ html+="<th>uniware_sku</th><th>styleid</th><th>category</th><th>LIVE mp_sku coun
 
 html+="</tr></thead><tbody>";
 
-data.forEach(r=>{
+data.slice(0,visibleRows).forEach(r=>{
 
 html+="<tr>";
 
