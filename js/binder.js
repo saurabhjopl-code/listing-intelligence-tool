@@ -16,37 +16,30 @@ import { renderTable } from "./renderers/tableRenderer.js";
 import { renderFilters } from "./renderers/filterRenderer.js";
 import { initTabs } from "./renderers/tabRenderer.js";
 
-import { startProgress, updateProgress, finishProgress } from "./engines/progressEngine.js";
-
-
-let DATA = {};
-let CURRENT_TAB = "summary";
+let DATA={};
+let CURRENT_TAB="summary";
 
 async function init(){
 
-startProgress();
+const sheets=await loadSheets();
 
-const sheets = await loadSheets();
+const catalog=buildCatalog(sheets);
+const listings=buildListingMap(sheets);
 
-updateProgress(30);
+const skuStatus=computeSkuStatus(catalog,listings);
 
-const catalog = buildCatalog(sheets);
-const listings = buildListingMap(sheets);
+const indexes=buildIndexes(catalog,listings,sheets.size_count);
 
-const skuStatus = computeSkuStatus(catalog,listings);
-
-const indexes = buildIndexes(catalog,listings,sheets.size_count);
-
-const styleCoverage = computeStyleCoverage(
+const styleCoverage=computeStyleCoverage(
 indexes.styleSkuIndex,
 skuStatus,
 catalog
 );
 
-const missing = getMissingSizes(catalog,listings);
-const critical = getCriticalSkus(skuStatus);
+const missing=getMissingSizes(catalog,listings);
+const critical=getCriticalSkus(skuStatus);
 
-DATA = {
+DATA={
 catalog,
 listings,
 skuStatus,
@@ -60,7 +53,7 @@ renderSummary(styleCoverage);
 renderFilters(DATA,applyAll);
 
 initTabs(tab=>{
-CURRENT_TAB = tab;
+CURRENT_TAB=tab;
 applyAll();
 });
 
@@ -68,46 +61,56 @@ setupSearch();
 
 applyAll();
 
-finishProgress();
-
 }
-
 
 function setupSearch(){
 
-const box = document.getElementById("searchBox");
-const clear = document.getElementById("clearSearch");
+const box=document.getElementById("searchBox");
+const clear=document.getElementById("clearSearch");
 
-box.oninput = applyAll;
+box.oninput=applyAll;
 
-clear.onclick = ()=>{
+clear.onclick=()=>{
 box.value="";
 applyAll();
 };
 
 }
 
-
 function applyAll(){
 
-const mp = document.getElementById("mpFilter")?.value;
-const cat = document.getElementById("catFilter")?.value;
+const mp=document.getElementById("mpFilter")?.value;
+const acc=document.getElementById("accFilter")?.value;
+const cat=document.getElementById("catFilter")?.value;
 
-const term = document.getElementById("searchBox")?.value;
+const term=document.getElementById("searchBox")?.value;
 
-let data = DATA.styleCoverage;
+let data;
 
-data = applyFilters(data,{mp,category:cat});
+if(CURRENT_TAB==="summary") data=DATA.styleCoverage;
 
-data = applySearch(data,term);
+if(CURRENT_TAB==="live")
+data=DATA.skuStatus.filter(r=>r.status==="LIVE");
+
+if(CURRENT_TAB==="partial")
+data=DATA.missing;
+
+if(CURRENT_TAB==="nonlive")
+data=DATA.skuStatus.filter(r=>r.status==="NON_LIVE");
+
+if(CURRENT_TAB==="critical")
+data=DATA.critical;
+
+data=applyFilters(data,{mp,acc,category:cat});
+
+data=applySearch(data,term);
 
 renderTable(
 "app",
-["styleid","live","total","category","parent_remark"],
+Object.keys(data[0]||{}),
 data
 );
 
 }
-
 
 init();
