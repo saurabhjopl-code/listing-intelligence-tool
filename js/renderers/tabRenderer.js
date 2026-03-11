@@ -1,25 +1,17 @@
-export function initTabs(){
+export function initTabs(callback){
 
 const buttons = document.querySelectorAll(".tabs button");
 
-buttons.forEach(btn => {
+buttons.forEach(btn=>{
 
-btn.addEventListener("click", () => {
+btn.addEventListener("click",()=>{
 
 const tab = btn.dataset.tab;
 
-switchTab(tab);
+callback(tab);
 
 });
 
 });
-
-}
-
-function switchTab(tab){
-
-const app = document.getElementById("app");
-
-app.innerHTML = `<h2>${tab.toUpperCase()}</h2>`;
 
 }
