@@ -1,17 +1,24 @@
 export function buildMatrix(master,data,channel){
 
-const map={};
-
-channel.forEach(r=>{
-map[r.channel_name]={mp:r.mp,account:r.account};
-});
-
 const mpGroups={};
+const channelMap={};
 
 channel.forEach(r=>{
+
+channelMap[r.channel_name]={
+mp:r.mp,
+account:r.account
+};
+
 if(!mpGroups[r.mp]) mpGroups[r.mp]=[];
-mpGroups[r.mp].push(r.account);
+
+mpGroups[r.mp].push({
+channel:r.channel_name,
+account:r.account
 });
+
+});
+
 
 const listingSet=new Set();
 
@@ -19,15 +26,14 @@ data.forEach(r=>{
 listingSet.add(r.channel_name+"|"+r.uniware_sku);
 });
 
+
 const matrix=master.map(r=>{
 
 const row={
-
 uniware_sku:r.uniware_sku,
 styleid:r.styleid,
 category:r.category,
 size:r.size
-
 };
 
 Object.keys(mpGroups).forEach(mp=>{
@@ -38,7 +44,7 @@ let live=false;
 
 accounts.forEach(a=>{
 
-const key=a+"|"+r.uniware_sku;
+const key=a.channel+"|"+r.uniware_sku;
 
 if(listingSet.has(key)) live=true;
 
@@ -52,6 +58,10 @@ return row;
 
 });
 
-return{matrix,mpGroups};
+return{
+matrix,
+mpGroups,
+listingSet
+};
 
 }
