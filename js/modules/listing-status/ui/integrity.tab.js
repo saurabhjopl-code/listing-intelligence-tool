@@ -1,1 +1,0 @@
-// Integrity Tab Renderer

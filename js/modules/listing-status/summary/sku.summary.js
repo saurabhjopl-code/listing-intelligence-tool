@@ -1,1 +1,0 @@
-// SKU summary metrics
