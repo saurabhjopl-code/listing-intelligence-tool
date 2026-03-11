@@ -14,3 +14,18 @@ row.uniware_sku?.toLowerCase().includes(term)
 });
 
 }
+
+
+let timer = null;
+
+export function debounceSearch(callback){
+
+clearTimeout(timer);
+
+timer = setTimeout(()=>{
+
+callback();
+
+},300);
+
+}
