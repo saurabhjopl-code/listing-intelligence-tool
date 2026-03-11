@@ -1,6 +1,8 @@
+let expandedMP = null
 let expandedSKU = null
 let visibleRows = 50
 
+/* ---------------- MATRIX TABLE ---------------- */
 
 export function renderMatrix(container,data,mpGroups){
 
@@ -14,9 +16,9 @@ html+="<th>category</th>"
 html+="<th>size</th>"
 
 Object.keys(mpGroups).forEach(mp=>{
-
-html+=`<th>${mp} (${mpGroups[mp].length})</th>`
-
+html+=`<th class="mpHeader" data-mp="${mp}">
+${mp} (${mpGroups[mp].length})
+</th>`
 })
 
 html+="</tr></thead><tbody>"
@@ -31,14 +33,40 @@ html+=`<td>${r.category}</td>`
 html+=`<td>${r.size}</td>`
 
 Object.keys(mpGroups).forEach(mp=>{
-
 const cls=r[mp]==="LIVE"?"live":"nonlive"
-
 html+=`<td class="${cls}">${r[mp]}</td>`
+})
+
+html+="</tr>"
+
+/* MP ACCOUNT EXPANSION */
+
+if(expandedMP){
+
+const accounts = mpGroups[expandedMP]
+
+accounts.forEach(acc=>{
+
+html+="<tr class='accountRow'>"
+
+html+="<td></td>"
+html+="<td colspan='3'>"+acc.account+"</td>"
+
+Object.keys(mpGroups).forEach(mp=>{
+
+if(mp===expandedMP){
+html+=`<td>•</td>`
+}else{
+html+="<td></td>"
+}
 
 })
 
 html+="</tr>"
+
+})
+
+}
 
 })
 
@@ -56,23 +84,41 @@ html+=`
 
 container.innerHTML=html
 
-const btn=document.getElementById("loadMore")
+attachMatrixEvents(container,data,mpGroups)
 
-if(btn){
+}
 
-btn.onclick=()=>{
+function attachMatrixEvents(container,data,mpGroups){
 
-visibleRows+=50
+document.querySelectorAll(".mpHeader").forEach(h=>{
+
+h.onclick=()=>{
+
+const mp=h.dataset.mp
+
+expandedMP = expandedMP===mp ? null : mp
 
 renderMatrix(container,data,mpGroups)
 
 }
 
+})
+
+const btn=document.getElementById("loadMore")
+
+if(btn){
+
+btn.onclick=()=>{
+visibleRows+=50
+renderMatrix(container,data,mpGroups)
 }
 
 }
 
+}
 
+
+/* ---------------- COUNT TABLE ---------------- */
 
 export function renderCount(container,data,distribution){
 
@@ -94,11 +140,9 @@ const expanded = expandedSKU===r.uniware_sku
 
 html+="<tr>"
 
-html+=`
-<td class="expandBtn" data-sku="${r.uniware_sku}">
+html+=`<td class="expandBtn" data-sku="${r.uniware_sku}">
 ${expanded?"▼":"▶"}
-</td>
-`
+</td>`
 
 html+=`<td>${r.uniware_sku}</td>`
 html+=`<td>${r.styleid}</td>`
@@ -106,6 +150,8 @@ html+=`<td>${r.category}</td>`
 html+=`<td>${r.count}</td>`
 
 html+="</tr>"
+
+/* SKU DISTRIBUTION */
 
 if(expanded){
 
@@ -116,8 +162,8 @@ Object.keys(dist).forEach(mp=>{
 html+="<tr class='distRow'>"
 
 html+="<td></td>"
-html+=`<td colspan="2">${mp}</td>`
-html+=`<td colspan="2">${dist[mp]}</td>`
+html+=`<td colspan="3">${mp}</td>`
+html+=`<td>${dist[mp]}</td>`
 
 html+="</tr>"
 
@@ -129,8 +175,23 @@ html+="</tr>"
 
 html+="</tbody></table>"
 
+if(data.length>visibleRows){
+
+html+=`
+<div style="padding:20px;text-align:center">
+<button id="loadMoreCount">Load More</button>
+</div>
+`
+
+}
+
 container.innerHTML=html
 
+attachCountEvents(container,data,distribution)
+
+}
+
+function attachCountEvents(container,data,distribution){
 
 document.querySelectorAll(".expandBtn").forEach(btn=>{
 
@@ -145,5 +206,16 @@ renderCount(container,data,distribution)
 }
 
 })
+
+const btn=document.getElementById("loadMoreCount")
+
+if(btn){
+
+btn.onclick=()=>{
+visibleRows+=50
+renderCount(container,data,distribution)
+}
+
+}
 
 }
