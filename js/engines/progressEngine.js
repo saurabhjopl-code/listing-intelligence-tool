@@ -1,4 +1,4 @@
-let bar = null;
+let bar;
 
 export function startProgress(){
 
@@ -7,7 +7,7 @@ bar = document.getElementById("progressBar");
 if(!bar) return;
 
 bar.style.display = "block";
-bar.style.width = "5%";
+bar.style.width = "10%";
 
 }
 
@@ -27,6 +27,6 @@ bar.style.width = "100%";
 
 setTimeout(()=>{
 bar.style.display = "none";
-},400);
+},500);
 
 }
