@@ -8,13 +8,13 @@ import { computeSkuStatus } from "./engines/skuStatusEngine.js";
 
 import { computeStyleCoverage } from "./engines/styleCoverageEngine.js";
 
+import { buildIndexes } from "./engines/indexEngine.js";
+
 import { getMarketplaceCoverage } from "./engines/marketplaceCoverageEngine.js";
 
 import { getMissingSizes } from "./engines/missingSizeEngine.js";
 
 import { getCriticalSkus } from "./engines/criticalSkuEngine.js";
-
-import { exportCSV } from "./engines/exportEngine.js";
 
 import { renderSummary } from "./renderers/summaryRenderer.js";
 
@@ -24,6 +24,7 @@ import { initTabs } from "./renderers/tabRenderer.js";
 
 
 let DATA = {};
+
 
 async function init(){
 
@@ -35,33 +36,49 @@ const listings = buildListingMap(sheets);
 
 const skuStatus = computeSkuStatus(catalog,listings);
 
-const styleCoverage = computeStyleCoverage(skuStatus);
+const indexes = buildIndexes(
 
-const mpCoverage = getMarketplaceCoverage(listings,catalog);
+catalog,
+listings,
+sheets.size_count
+
+);
+
+const styleCoverage = computeStyleCoverage(
+
+indexes.styleSkuIndex,
+skuStatus
+
+);
+
+const mpCoverage = getMarketplaceCoverage(
+
+indexes.mpSkuIndex,
+catalog
+
+);
 
 const missing = getMissingSizes(catalog,listings);
 
 const critical = getCriticalSkus(skuStatus);
 
+
 DATA = {
 
 catalog,
-
 listings,
-
 skuStatus,
-
 styleCoverage,
-
 mpCoverage,
-
 missing,
-
-critical
+critical,
+indexes
 
 };
 
+
 renderSummary(styleCoverage);
+
 
 renderTable(
 
@@ -72,6 +89,7 @@ renderTable(
 styleCoverage
 
 );
+
 
 initTabs(renderTab);
 
