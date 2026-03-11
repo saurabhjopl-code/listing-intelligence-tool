@@ -1,115 +1,107 @@
 import { loadSheets } from "./core/sheetLoader.js";
 import { buildMatrix } from "./engines/matrixEngine.js";
 import { buildCount } from "./engines/countEngine.js";
-import { renderMatrix,renderCount } from "./renderers/tableRenderer.js";
+import { renderMatrix, renderCount } from "./renderers/tableRenderer.js";
 
-let MATRIX=[];
-let COUNT=[];
-let MPGROUPS={};
+let MATRIX = [];
+let COUNT = [];
+let MPGROUPS = {};
+let LISTINGSET = new Set();
 
-let TAB="matrix";
+let TAB = "matrix";
 
-const tableArea=document.getElementById("tableArea");
+const tableArea = document.getElementById("tableArea");
+const bar = document.getElementById("progressBar");
 
-const bar=document.getElementById("progressBar");
+function showProgress(v) {
 
-function showProgress(v){
+    bar.style.display = "block";
+    bar.style.width = v + "%";
 
-bar.style.display="block";
-bar.style.width=v+"%";
-
-if(v===100){
-setTimeout(()=>bar.style.display="none",400);
+    if (v === 100) {
+        setTimeout(() => {
+            bar.style.display = "none";
+        }, 400);
+    }
 }
 
+async function init() {
+
+    showProgress(10);
+
+    const sheets = await loadSheets();
+
+    showProgress(40);
+
+    const result = buildMatrix(
+        sheets.master,
+        sheets.data,
+        sheets.channel
+    );
+
+    MATRIX = result.matrix;
+    MPGROUPS = result.mpGroups;
+    LISTINGSET = result.listingSet;
+
+    showProgress(70);
+
+    COUNT = buildCount(
+        sheets.master,
+        sheets.data
+    );
+
+    showProgress(90);
+
+    render();
+
+    showProgress(100);
 }
 
-async function init(){
+function render() {
 
-showProgress(10);
-
-const sheets=await loadSheets();
-
-showProgress(40);
-
-const result=buildMatrix(
-sheets.master,
-sheets.data,
-sheets.channel
-);
-
-MATRIX=result.matrix;
-MPGROUPS=result.mpGroups;
-
-showProgress(70);
-
-COUNT=buildCount(
-sheets.master,
-sheets.data
-);
-
-showProgress(90);
-
-render();
-
-showProgress(100);
+    if (TAB === "matrix") {
+        renderMatrix(tableArea, MATRIX, MPGROUPS, LISTINGSET);
+    } else {
+        renderCount(tableArea, COUNT);
+    }
 
 }
 
-function render(){
+document.querySelectorAll(".tabs button").forEach(b => {
 
-if(TAB==="matrix"){
-renderMatrix(tableArea,MATRIX,MPGROUPS,RESULT.listingSet);
-}else{
-renderCount(tableArea,COUNT);
-}
+    b.onclick = () => {
 
-}
+        document.querySelectorAll(".tabs button")
+            .forEach(x => x.classList.remove("active"));
 
-document.querySelectorAll(".tabs button").forEach(b=>{
+        b.classList.add("active");
 
-b.onclick=()=>{
+        TAB = b.dataset.tab;
 
-document.querySelectorAll(".tabs button")
-.forEach(x=>x.classList.remove("active"));
-
-b.classList.add("active");
-
-TAB=b.dataset.tab;
-
-render();
-
-};
+        render();
+    };
 
 });
 
-const search=document.getElementById("searchBox");
+const search = document.getElementById("searchBox");
 
 let timer;
 
-search.oninput=()=>{
+search.oninput = () => {
 
-clearTimeout(timer);
+    clearTimeout(timer);
 
-timer=setTimeout(()=>{
+    timer = setTimeout(() => {
 
-const t=search.value.toLowerCase();
+        const t = search.value.toLowerCase();
 
-const filtered=MATRIX.filter(r=>
-JSON.stringify(r).toLowerCase().includes(t)
-);
+        const filtered = MATRIX.filter(r =>
+            JSON.stringify(r).toLowerCase().includes(t)
+        );
 
-renderMatrix(tableArea,filtered,MPGROUPS);
+        renderMatrix(tableArea, filtered, MPGROUPS, LISTINGSET);
 
-},300);
-
+    }, 300);
 };
 
-const RESULT = buildMatrix(...)
-
-MATRIX = RESULT.matrix
-MPGROUPS = RESULT.mpGroups
-
 init();
-
-
