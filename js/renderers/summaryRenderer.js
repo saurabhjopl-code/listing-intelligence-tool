@@ -4,11 +4,11 @@ const grid = document.getElementById("summaryGrid");
 
 const total = data.length;
 
-const fullLive = data.filter(d => d.live === d.total).length;
+const fullLive = data.filter(d=>d.live===d.total).length;
 
-const partial = data.filter(d => d.live > 0 && d.live < d.total).length;
+const partial = data.filter(d=>d.live>0 && d.live<d.total).length;
 
-const nonLive = data.filter(d => d.live === 0).length;
+const nonLive = data.filter(d=>d.live===0).length;
 
 grid.innerHTML = `
 
