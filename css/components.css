@@ -45,3 +45,13 @@ border-bottom:1px solid #eee;
 font-size:13px;
 
 }
+
+
+.card h2{
+margin-top:8px;
+font-size:22px;
+}
+
+#app{
+padding:20px;
+}
