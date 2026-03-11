@@ -1,39 +1,32 @@
-let progress = 0;
+let bar = null;
 
 export function startProgress(){
 
-const bar = document.getElementById("progressBar");
+bar = document.getElementById("progressBar");
 
-progress = 5;
+if(!bar) return;
 
 bar.style.display = "block";
-
-bar.style.width = progress + "%";
+bar.style.width = "5%";
 
 }
 
 export function updateProgress(value){
 
-const bar = document.getElementById("progressBar");
+if(!bar) return;
 
-progress = value;
-
-bar.style.width = progress + "%";
+bar.style.width = value + "%";
 
 }
 
 export function finishProgress(){
 
-const bar = document.getElementById("progressBar");
+if(!bar) return;
 
-progress = 100;
-
-bar.style.width = progress + "%";
+bar.style.width = "100%";
 
 setTimeout(()=>{
-
 bar.style.display = "none";
-
-},500);
+},400);
 
 }
