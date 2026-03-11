@@ -83,3 +83,17 @@ color:white;
 #app{
 padding:24px;
 }
+
+
+.progress-container{
+height:3px;
+background:#e5e7eb;
+}
+
+#progressBar{
+height:3px;
+width:0%;
+background:#2563eb;
+display:none;
+transition:width .3s ease;
+}
