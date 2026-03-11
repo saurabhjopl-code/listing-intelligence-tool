@@ -1,9 +1,14 @@
 export function getCriticalSkus(skuStatus){
 
-return skuStatus.filter(row=>{
+return skuStatus
+.filter(r=>r.status==="CRITICAL")
+.map(r=>({
 
-return row.status === "CRITICAL";
+uniware_sku:r.uniware_sku,
+styleid:r.styleid,
+stock:r.stock,
+status:r.status
 
-});
+}));
 
 }
