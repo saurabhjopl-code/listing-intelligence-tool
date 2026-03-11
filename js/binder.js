@@ -68,18 +68,21 @@ async function init() {
 function render() {
 
     if (TAB === "matrix") {
+
         renderMatrix(
             tableArea,
             MATRIX,
-            MPGROUPS,
-            LISTINGSET,
-            DISTRIBUTION
+            MPGROUPS
         );
+
     } else {
+
         renderCount(
             tableArea,
-            COUNT
+            COUNT,
+            DISTRIBUTION
         );
+
     }
 
 }
@@ -119,9 +122,7 @@ search.oninput = () => {
         renderMatrix(
             tableArea,
             filtered,
-            MPGROUPS,
-            LISTINGSET,
-            DISTRIBUTION
+            MPGROUPS
         );
 
     }, 300);
