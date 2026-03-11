@@ -59,7 +59,7 @@ showProgress(100);
 function render(){
 
 if(TAB==="matrix"){
-renderMatrix(tableArea,MATRIX,MPGROUPS);
+renderMatrix(tableArea,MATRIX,MPGROUPS,RESULT.listingSet);
 }else{
 renderCount(tableArea,COUNT);
 }
@@ -105,4 +105,11 @@ renderMatrix(tableArea,filtered,MPGROUPS);
 
 };
 
+const RESULT = buildMatrix(...)
+
+MATRIX = RESULT.matrix
+MPGROUPS = RESULT.mpGroups
+
 init();
+
+
