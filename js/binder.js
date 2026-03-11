@@ -1,162 +1,108 @@
 import { loadSheets } from "./core/sheetLoader.js";
-import { applySearch, applySearchDebounced } from "./core/searchEngine.js";
+import { buildMatrix } from "./engines/matrixEngine.js";
+import { buildCount } from "./engines/countEngine.js";
+import { renderMatrix,renderCount } from "./renderers/tableRenderer.js";
 
-import { buildCatalog } from "./engines/masterCatalogEngine.js";
-import { buildListingMap } from "./engines/listingPresenceEngine.js";
-import { computeSkuStatus } from "./engines/skuStatusEngine.js";
-import { computeStyleCoverage } from "./engines/styleCoverageEngine.js";
+let MATRIX=[];
+let COUNT=[];
+let MPGROUPS={};
 
-import { renderSummary } from "./renderers/summaryRenderer.js";
-import { renderTable } from "./renderers/tableRenderer.js";
-import { renderFilters } from "./renderers/filterRenderer.js";
-import { initTabs } from "./renderers/tabRenderer.js";
+let TAB="matrix";
 
-import { startProgress, updateProgress, finishProgress } from "./engines/progressEngine.js";
+const tableArea=document.getElementById("tableArea");
 
-let DATA = {};
-let CURRENT_TAB = "summary";
+const bar=document.getElementById("progressBar");
+
+function showProgress(v){
+
+bar.style.display="block";
+bar.style.width=v+"%";
+
+if(v===100){
+setTimeout(()=>bar.style.display="none",400);
+}
+
+}
 
 async function init(){
 
-startProgress();
+showProgress(10);
 
-updateProgress(15);
+const sheets=await loadSheets();
 
-const sheets = await loadSheets();
+showProgress(40);
 
-updateProgress(35);
+const result=buildMatrix(
+sheets.master,
+sheets.data,
+sheets.channel
+);
 
-const catalog = buildCatalog(sheets);
+MATRIX=result.matrix;
+MPGROUPS=result.mpGroups;
 
-updateProgress(50);
+showProgress(70);
 
-const listings = buildListingMap(sheets);
+COUNT=buildCount(
+sheets.master,
+sheets.data
+);
 
-updateProgress(65);
+showProgress(90);
 
-const skuStatus = computeSkuStatus(catalog,listings);
+render();
 
-updateProgress(80);
-
-DATA = {
-catalog,
-listings,
-skuStatus
-};
-
-renderFilters(DATA,applyAll);
-
-initTabs(tab=>{
-CURRENT_TAB = tab;
-applyAll();
-});
-
-setupSearch();
-
-applyAll();
-
-updateProgress(100);
-
-finishProgress();
+showProgress(100);
 
 }
 
+function render(){
 
-
-function setupSearch(){
-
-const box = document.getElementById("searchBox");
-const clear = document.getElementById("clearSearch");
-
-box.oninput = ()=>{
-applySearchDebounced(applyAll);
-};
-
-clear.onclick = ()=>{
-box.value="";
-applyAll();
-};
+if(TAB==="matrix"){
+renderMatrix(tableArea,MATRIX,MPGROUPS);
+}else{
+renderCount(tableArea,COUNT);
+}
 
 }
 
+document.querySelectorAll(".tabs button").forEach(b=>{
 
+b.onclick=()=>{
 
-function applyAll(){
+document.querySelectorAll(".tabs button")
+.forEach(x=>x.classList.remove("active"));
 
-const mp = document.getElementById("mpFilter")?.value;
-const acc = document.getElementById("accFilter")?.value;
-const cat = document.getElementById("catFilter")?.value;
-const term = document.getElementById("searchBox")?.value;
+b.classList.add("active");
 
-let data = DATA.skuStatus.map(sku=>{
+TAB=b.dataset.tab;
 
-const catalog = DATA.catalog.find(c=>c.uniware_sku===sku.uniware_sku) || {};
-const listing = DATA.listings.find(l=>l.uniware_sku===sku.uniware_sku) || {};
+render();
 
-return {
-...sku,
-category:catalog.category,
-styleid:catalog.styleid,
-parent_remark:catalog.parent_remark,
-mp:listing.mp,
-account:listing.account
 };
 
 });
 
+const search=document.getElementById("searchBox");
 
+let timer;
 
-if(mp) data = data.filter(r=>r.mp===mp);
+search.oninput=()=>{
 
-if(acc) data = data.filter(r=>r.account===acc);
+clearTimeout(timer);
 
-if(cat) data = data.filter(r=>r.category===cat);
+timer=setTimeout(()=>{
 
-data = applySearch(data,term);
+const t=search.value.toLowerCase();
 
-
-
-if(CURRENT_TAB==="summary"){
-
-const summary = computeStyleCoverage(data);
-
-renderSummary(summary);
-
-renderTable(
-"app",
-["styleid","live","total","category","parent_remark"],
-summary
+const filtered=MATRIX.filter(r=>
+JSON.stringify(r).toLowerCase().includes(t)
 );
 
-}
+renderMatrix(tableArea,filtered,MPGROUPS);
 
+},300);
 
+};
 
-if(CURRENT_TAB==="live"){
-
-const live = data.filter(r=>r.status==="LIVE");
-
-renderTable(
-"app",
-["uniware_sku","styleid","stock","status","mp","account"],
-live
-);
-
-}
-
-
-
-if(CURRENT_TAB==="nonlive"){
-
-const nonlive = data.filter(r=>r.status==="NON_LIVE");
-
-renderTable(
-"app",
-["uniware_sku","styleid","stock","status","mp","account"],
-nonlive
-);
-
-}
-
-}
 init();
