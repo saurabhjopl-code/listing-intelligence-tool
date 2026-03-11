@@ -2,22 +2,10 @@ export function getMissingSizes(catalog, listings){
 
 const listingSet = new Set();
 
-listings.forEach(row=>{
-listingSet.add(row.uniware_sku);
+listings.forEach(r=>{
+listingSet.add(r.uniware_sku);
 });
 
-const missing = [];
-
-catalog.forEach(row=>{
-
-if(!listingSet.has(row.uniware_sku)){
-
-missing.push(row);
-
-}
-
-});
-
-return missing;
+return catalog.filter(r=>!listingSet.has(r.uniware_sku));
 
 }
