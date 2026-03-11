@@ -1,21 +1,21 @@
-let expandedMP = null
 let expandedSKU = null
 let visibleRows = 50
 
-export function renderMatrix(container,data,mpGroups,listingSet,distribution){
+
+export function renderMatrix(container,data,mpGroups){
 
 const slice = data.slice(0,visibleRows)
 
 let html="<table><thead><tr>"
 
-html+="<th></th>"
-html+="<th>uniware_sku</th><th>styleid</th><th>category</th><th>size</th>"
+html+="<th>uniware_sku</th>"
+html+="<th>styleid</th>"
+html+="<th>category</th>"
+html+="<th>size</th>"
 
 Object.keys(mpGroups).forEach(mp=>{
 
-html+=`<th class="mpHeader" data-mp="${mp}">
-${mp} (${mpGroups[mp].length})
-</th>`
+html+=`<th>${mp} (${mpGroups[mp].length})</th>`
 
 })
 
@@ -23,15 +23,9 @@ html+="</tr></thead><tbody>"
 
 slice.forEach(r=>{
 
-const isExpanded = expandedSKU===r.uniware_sku
-
 html+="<tr>"
 
-html+=`<td class="expandBtn" data-sku="${r.uniware_sku}">
-${isExpanded ? "▼" : "▶"}
-</td>`
-
-html+=`<td class="skuCell">${r.uniware_sku}</td>`
+html+=`<td>${r.uniware_sku}</td>`
 html+=`<td>${r.styleid}</td>`
 html+=`<td>${r.category}</td>`
 html+=`<td>${r.size}</td>`
@@ -45,30 +39,6 @@ html+=`<td class="${cls}">${r[mp]}</td>`
 })
 
 html+="</tr>"
-
-if(isExpanded){
-
-const dist = distribution[r.uniware_sku] || {}
-
-Object.keys(dist).forEach(mp=>{
-
-html+="<tr class='skuExpand'>"
-
-html+="<td></td>"
-html+="<td colspan='3'>"+mp+"</td>"
-html+="<td>"+dist[mp]+"</td>"
-
-Object.keys(mpGroups).forEach(()=>{
-
-html+="<td></td>"
-
-})
-
-html+="</tr>"
-
-})
-
-}
 
 })
 
@@ -86,40 +56,6 @@ html+=`
 
 container.innerHTML=html
 
-attachEvents(container,data,mpGroups,listingSet,distribution)
-
-}
-
-function attachEvents(container,data,mpGroups,listingSet,distribution){
-
-document.querySelectorAll(".mpHeader").forEach(h=>{
-
-h.onclick=()=>{
-
-const mp=h.dataset.mp
-
-expandedMP = expandedMP===mp ? null : mp
-
-renderMatrix(container,data,mpGroups,listingSet,distribution)
-
-}
-
-})
-
-document.querySelectorAll(".expandBtn").forEach(b=>{
-
-b.onclick=()=>{
-
-const sku=b.dataset.sku
-
-expandedSKU = expandedSKU===sku ? null : sku
-
-renderMatrix(container,data,mpGroups,listingSet,distribution)
-
-}
-
-})
-
 const btn=document.getElementById("loadMore")
 
 if(btn){
@@ -128,7 +64,7 @@ btn.onclick=()=>{
 
 visibleRows+=50
 
-renderMatrix(container,data,mpGroups,listingSet,distribution)
+renderMatrix(container,data,mpGroups)
 
 }
 
@@ -137,10 +73,14 @@ renderMatrix(container,data,mpGroups,listingSet,distribution)
 }
 
 
-export function renderCount(container,data){
+
+export function renderCount(container,data,distribution){
+
+const slice=data.slice(0,visibleRows)
 
 let html="<table><thead><tr>"
 
+html+="<th></th>"
 html+="<th>uniware_sku</th>"
 html+="<th>styleid</th>"
 html+="<th>category</th>"
@@ -148,9 +88,17 @@ html+="<th>LIVE mp_sku count</th>"
 
 html+="</tr></thead><tbody>"
 
-data.slice(0,visibleRows).forEach(r=>{
+slice.forEach(r=>{
+
+const expanded = expandedSKU===r.uniware_sku
 
 html+="<tr>"
+
+html+=`
+<td class="expandBtn" data-sku="${r.uniware_sku}">
+${expanded?"▼":"▶"}
+</td>
+`
 
 html+=`<td>${r.uniware_sku}</td>`
 html+=`<td>${r.styleid}</td>`
@@ -159,10 +107,43 @@ html+=`<td>${r.count}</td>`
 
 html+="</tr>"
 
+if(expanded){
+
+const dist=distribution[r.uniware_sku]||{}
+
+Object.keys(dist).forEach(mp=>{
+
+html+="<tr class='distRow'>"
+
+html+="<td></td>"
+html+=`<td colspan="2">${mp}</td>`
+html+=`<td colspan="2">${dist[mp]}</td>`
+
+html+="</tr>"
+
+})
+
+}
+
 })
 
 html+="</tbody></table>"
 
 container.innerHTML=html
+
+
+document.querySelectorAll(".expandBtn").forEach(btn=>{
+
+btn.onclick=()=>{
+
+const sku=btn.dataset.sku
+
+expandedSKU = expandedSKU===sku ? null : sku
+
+renderCount(container,data,distribution)
+
+}
+
+})
 
 }
