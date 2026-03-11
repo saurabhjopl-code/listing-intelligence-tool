@@ -1,12 +1,14 @@
 import { loadSheets } from "./core/sheetLoader.js";
 import { buildMatrix } from "./engines/matrixEngine.js";
 import { buildCount } from "./engines/countEngine.js";
+import { buildDistribution } from "./engines/mpDistributionEngine.js";
 import { renderMatrix, renderCount } from "./renderers/tableRenderer.js";
 
 let MATRIX = [];
 let COUNT = [];
 let MPGROUPS = {};
 let LISTINGSET = new Set();
+let DISTRIBUTION = {};
 
 let TAB = "matrix";
 
@@ -43,10 +45,16 @@ async function init() {
     MPGROUPS = result.mpGroups;
     LISTINGSET = result.listingSet;
 
-    showProgress(70);
+    showProgress(60);
 
     COUNT = buildCount(
         sheets.master,
+        sheets.data
+    );
+
+    showProgress(80);
+
+    DISTRIBUTION = buildDistribution(
         sheets.data
     );
 
@@ -60,9 +68,18 @@ async function init() {
 function render() {
 
     if (TAB === "matrix") {
-        renderMatrix(tableArea, MATRIX, MPGROUPS, LISTINGSET);
+        renderMatrix(
+            tableArea,
+            MATRIX,
+            MPGROUPS,
+            LISTINGSET,
+            DISTRIBUTION
+        );
     } else {
-        renderCount(tableArea, COUNT);
+        renderCount(
+            tableArea,
+            COUNT
+        );
     }
 
 }
@@ -99,7 +116,13 @@ search.oninput = () => {
             JSON.stringify(r).toLowerCase().includes(t)
         );
 
-        renderMatrix(tableArea, filtered, MPGROUPS, LISTINGSET);
+        renderMatrix(
+            tableArea,
+            filtered,
+            MPGROUPS,
+            LISTINGSET,
+            DISTRIBUTION
+        );
 
     }, 300);
 };
