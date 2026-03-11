@@ -7,57 +7,34 @@
 
 <title>Listing Intelligence</title>
 
-<link rel="stylesheet" href="./css/reset.css">
-<link rel="stylesheet" href="./css/variables.css">
 <link rel="stylesheet" href="./css/layout.css">
-<link rel="stylesheet" href="./css/components.css">
 
 </head>
 
 <body>
 
-<header class="app-header">
+<header class="header">
 
-<div class="logo">
-Listing Intelligence
-</div>
+<div class="title">Listing Intelligence</div>
 
-<div class="search-area">
-
-<input id="searchBox" placeholder="Search Style / SKU">
-
-<button id="clearSearch" class="clear-btn">✕</button>
-
-</div>
-
-<div class="export">
-Export
-</div>
+<input id="searchBox" placeholder="Search SKU / Style">
 
 </header>
 
 <div class="progress-container">
-  <div id="progressBar"></div>
+<div id="progressBar"></div>
 </div>
-
-<div class="filter-bar" id="filterBar"></div>
-
-<div class="summary-grid" id="summaryGrid"></div>
 
 <div class="tabs">
 
-<button data-tab="summary">Summary</button>
-<button data-tab="live">Live</button>
-<button data-tab="partial">Partial Live</button>
-<button data-tab="nonlive">Non Live</button>
-<button data-tab="critical">Critical</button>
+<button data-tab="matrix" class="active">Listing Matrix</button>
+<button data-tab="count">Live mp_sku Count</button>
 
 </div>
 
-<div id="app"></div>
+<div id="tableArea"></div>
 
 <script type="module" src="./js/binder.js"></script>
 
 </body>
-
 </html>
